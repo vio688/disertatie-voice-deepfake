@@ -1,0 +1,31 @@
+# Core ML
+torch>=2.0.0
+torchaudio>=2.0.0
+transformers>=4.35.0
+accelerate>=0.24.0
+
+# Audio processing
+librosa>=0.10.0
+soundfile>=0.12.1
+pydub>=0.25.1
+ffmpeg-python>=0.2.0
+
+# Data collection
+yt-dlp>=2023.11.0
+demucs>=4.0.0
+
+# Visualization
+matplotlib>=3.7.0
+plotly>=5.17.0
+
+# UI
+gradio>=4.7.0
+
+# Utilities
+numpy>=1.24.0
+scipy>=1.11.0
+tqdm>=4.66.0
+requests>=2.31.0
+
+# Optional: RVC (installed separately via git clone)
+# rvc-python>=0.1.0  # uncomment if using pip-installable RVC wrapper

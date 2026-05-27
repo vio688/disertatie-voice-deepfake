@@ -1,0 +1,52 @@
+# Large binary / data files
+data/
+models/
+Voci/
+New folder/
+*.pth
+*.index
+*.pt
+*.ckpt
+
+# Audio files (except sample demos)
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.ogg
+!docs/samples/*.wav
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Colab temp
+/content/
