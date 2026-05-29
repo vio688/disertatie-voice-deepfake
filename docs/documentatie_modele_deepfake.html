@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentatie — Ensemble Detectie Deepfake Audio (4 Modele)</title>
+<style>
+  :root {
+    --primary: #6c63ff;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --m1: #e74c3c;
+    --m2: #8e44ad;
+    --m3: #2980b9;
+    --m4: #27ae60;
+    --ens: #2c3e50;
+    --code-bg: #1e293b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+
+  header {
+    background: linear-gradient(135deg, #1e293b 0%, #4338ca 50%, #7c3aed 100%);
+    color: white; padding: 60px 40px 44px; text-align: center;
+  }
+  header h1 { font-size: 2.1em; font-weight: 800; margin-bottom: 10px; }
+  header p { font-size: 1.05em; opacity: 0.88; }
+  .badge { display: inline-block; background: rgba(255,255,255,0.18); border-radius: 20px; padding: 4px 14px; font-size: 0.84em; margin: 5px 3px; border: 1px solid rgba(255,255,255,0.25); }
+
+  nav { background: white; border-bottom: 1px solid var(--border); padding: 0 40px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+  nav ul { list-style: none; display: flex; flex-wrap: wrap; }
+  nav a { display: block; padding: 15px 16px; color: var(--muted); text-decoration: none; font-size: 0.88em; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; }
+  nav a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 44px 24px 80px; }
+  section { margin-bottom: 64px; }
+
+  h2 { font-size: 1.55em; font-weight: 800; color: var(--primary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .num { background: var(--primary); color: white; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85em; flex-shrink: 0; }
+  h3 { font-size: 1.12em; font-weight: 700; margin: 26px 0 11px; display: flex; align-items: center; gap: 8px; }
+  h3::before { content: ''; display: block; width: 4px; height: 17px; background: var(--primary); border-radius: 2px; }
+  p { margin-bottom: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .card h4 { font-size: 1em; font-weight: 700; margin-bottom: 8px; }
+
+  /* Model cards with colored left border */
+  .model-card { border-left: 5px solid; border-radius: 12px; background: white; padding: 26px 28px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .model-card.m1 { border-color: var(--m1); }
+  .model-card.m2 { border-color: var(--m2); }
+  .model-card.m3 { border-color: var(--m3); }
+  .model-card.m4 { border-color: var(--m4); }
+  .model-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .model-badge { border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 1.1em; color: white; flex-shrink: 0; }
+  .m1 .model-badge { background: var(--m1); }
+  .m2 .model-badge { background: var(--m2); }
+  .m3 .model-badge { background: var(--m3); }
+  .m4 .model-badge { background: var(--m4); }
+  .model-title { font-size: 1.05em; font-weight: 700; }
+  .model-subtitle { font-size: 0.88em; color: var(--muted); margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  th { background: var(--primary); color: white; padding: 11px 15px; font-size: 0.89em; text-align: left; }
+  td { padding: 10px 15px; border-bottom: 1px solid var(--border); font-size: 0.91em; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+
+  .metric { display: inline-block; background: #f1f5f9; border-radius: 6px; padding: 3px 10px; font-size: 0.85em; font-weight: 600; margin: 2px 3px; }
+  .metric.good { background: #dcfce7; color: #166534; }
+  .metric.warn { background: #fef9c3; color: #854d0e; }
+  .metric.info { background: #dbeafe; color: #1e40af; }
+
+  code { background: #f1f5f9; color: #7c3aed; padding: 2px 6px; border-radius: 4px; font-size: 0.87em; font-family: monospace; }
+  pre { background: var(--code-bg); color: #e2e8f0; border-radius: 10px; padding: 20px; overflow-x: auto; font-size: 0.84em; line-height: 1.6; margin: 14px 0; }
+
+  .alert { padding: 15px 20px; border-radius: 10px; margin: 14px 0; display: flex; gap: 12px; align-items: flex-start; }
+  .alert-icon { font-size: 1.2em; flex-shrink: 0; margin-top: 2px; }
+  .alert-info { background: #eff6ff; border-left: 4px solid #3b82f6; }
+  .alert-success { background: #f0fdf4; border-left: 4px solid #10b981; }
+  .alert-warning { background: #fffbeb; border-left: 4px solid #f59e0b; }
+
+  .arch-diagram { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 20px; background: #f8f9ff; border-radius: 12px; margin: 16px 0; }
+  .arch-box { border: 2px solid var(--primary); border-radius: 10px; padding: 10px 18px; font-weight: 700; font-size: 0.88em; text-align: center; background: white; color: var(--primary); }
+  .arch-arrow { font-size: 1.3em; color: var(--muted); }
+
+  .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  .comparison-bar { height: 20px; border-radius: 4px; margin: 4px 0; display: flex; align-items: center; padding-left: 8px; color: white; font-size: 0.8em; font-weight: 700; }
+
+  footer { text-align: center; padding: 30px; color: var(--muted); font-size: 0.85em; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Ensemble Detectie Deepfake Audio</h1>
+  <p>Documentatie tehnica completa — 4 modele, arhitecturi, metodologie, comparatie</p>
+  <div style="margin-top:18px;">
+    <span class="badge">wav2vec2</span>
+    <span class="badge">WavLM</span>
+    <span class="badge">XLS-R</span>
+    <span class="badge">HuggingFace</span>
+    <span class="badge">Ensemble Learning</span>
+    <span class="badge">Disertatie 2026</span>
+  </div>
+</header>
+
+<nav>
+  <ul>
+    <li><a href="#intro">1. Introducere</a></li>
+    <li><a href="#modele">2. Cele 4 Modele</a></li>
+    <li><a href="#arhitecturi">3. Arhitecturi</a></li>
+    <li><a href="#comparatie">4. Comparatie</a></li>
+    <li><a href="#ensemble">5. Metodologie Ensemble</a></li>
+    <li><a href="#selectie">6. Justificare Selectie</a></li>
+    <li><a href="#limitari">7. Limitari</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ============================================================ -->
+<section id="intro">
+  <h2><span class="num">1</span> Introducere — De ce un ensemble de 4 modele?</h2>
+
+  <p>
+    Detectia deepfake audio este o problema deschisa in cercetarea actuala. Niciun model unic nu obtine rezultate bune pe toate tipurile de audio generat de AI — fiecare model are puncte forte si oarbe specifice, in functie de datele pe care a fost antrenat si arhitectura folosita.
+  </p>
+
+  <div class="alert alert-warning">
+    <span class="alert-icon">⚠</span>
+    <div>
+      <strong>Problema fundamentala:</strong> Cercetarea Speech DF Arena (2025) a demonstrat ca <em>"niciun model nu depaseste consistent celelalte modele pe toate seturile de date"</em>. Un model cu 99% acuratete pe ASVspoof2019 poate esua complet pe un generator de voce nou (ElevenLabs, Suno etc.).
+    </div>
+  </div>
+
+  <p>Solutia folosita in acest proiect este un <strong>ensemble de 4 modele</strong> care:</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Acopera arhitecturi diferite</h4>
+      <p>wav2vec2-base, wav2vec2-XLSR, WavLM si XLS-R-300M — fiecare extrage features diferite din acelasi semnal audio, reducand sansele ca toate sa esueze simultan.</p>
+    </div>
+    <div class="card">
+      <h4>Acopera date de antrenament diferite</h4>
+      <p>Un model antrenat pe ElevenLabs detecteaza altfel decat unul antrenat pe ASVspoof. Impreuna acopera un spectru mult mai larg de generatoare AI.</p>
+    </div>
+    <div class="card">
+      <h4>Reduce rata de fals negativ</h4>
+      <p>Daca un model da scor 0% (fals negativ), celelalte pot compensa. Scorul ensemble (medie) e mai robust decat orice model individual.</p>
+    </div>
+    <div class="card">
+      <h4>Valoare academica</h4>
+      <p>Comparatia vizuala intre modele (grafic cu 4 linii + ensemble) demonstreaza intelegerea profunda a domeniului si a diversitatii abordärilor existente.</p>
+    </div>
+  </div>
+
+  <div class="arch-diagram">
+    <div class="arch-box">Audio Input<br><small>(orice format)</small></div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box">Demucs<br><small>(optional)</small></div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box">Segmentare<br><small>ferestre 2s</small></div>
+    <span class="arch-arrow">→</span>
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div class="arch-box" style="border-color:var(--m1); color:var(--m1); padding:6px 12px; font-size:0.8em;">M1 wav2vec2-base</div>
+      <div class="arch-box" style="border-color:var(--m2); color:var(--m2); padding:6px 12px; font-size:0.8em;">M2 XLSR-53</div>
+      <div class="arch-box" style="border-color:var(--m3); color:var(--m3); padding:6px 12px; font-size:0.8em;">M3 WavLM-base</div>
+      <div class="arch-box" style="border-color:var(--m4); color:var(--m4); padding:6px 12px; font-size:0.8em;">M4 XLS-R-300M</div>
+    </div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box" style="border-color:var(--ens); color:var(--ens);">Ensemble<br><small>medie simpla</small></div>
+    <span class="arch-arrow">→</span>
+    <div class="arch-box">Verdict<br><small>+ grafice</small></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="modele">
+  <h2><span class="num">2</span> Cele 4 Modele — Descriere Detaliata</h2>
+
+  <!-- MODEL 1 -->
+  <div class="model-card m1">
+    <div class="model-header">
+      <div class="model-badge">M1</div>
+      <div>
+        <div class="model-title">MelodyMachine/Deepfake-audio-detection-V2</div>
+        <div class="model-subtitle">HuggingFace · Audio Classification · wav2vec2-base</div>
+      </div>
+    </div>
+
+    <h3>Arhitectura</h3>
+    <p>
+      Bazat pe <code>facebook/wav2vec2-base</code> — modelul de baza din familia wav2vec2 cu <strong>94.6 milioane de parametri</strong>. Este un model transformer pre-antrenat pe date audio brute (forma de unda), fara feature engineering manual. Fine-tuning pentru clasificare binara: real vs. fake.
+    </p>
+    <p>
+      Wav2vec2-base foloseste o retea CNN pentru a extrage reprezentari latente din forma de unda audio bruta, urmate de un encoder transformer cu 12 straturi. Outputul este o clasificare in doua clase dupa un strat fully-connected.
+    </p>
+
+    <h3>Date de antrenament</h3>
+    <p>
+      Antrenat pe un mix de audio uman real si audio generat de AI (TTS generic, voci sintetice). Setul de date include diverse tipuri de deepfake vocal — clonare de voce, conversie vocala, TTS text-to-speech. Versiunea V2 (actuala) este o imbunatatire fata de V1, cu mai multe date si fine-tuning suplimentar.
+    </p>
+
+    <h3>Performante</h3>
+    <span class="metric info">9.83k downloads</span>
+    <span class="metric good">Versiunea V2 (imbunatatita)</span>
+    <span class="metric info">94.6M parametri</span>
+
+    <h3>Puncte forte si slabe</h3>
+    <table>
+      <tr><th>Puncte forte</th><th>Puncte slabe</th></tr>
+      <tr>
+        <td>Foarte popular in comunitate (validat de multi utilizatori), generalist — functioneaza pe tipuri diverse de deepfake, model compact si rapid</td>
+        <td>Arhitectura de baza (base, nu large) — mai putin putere decat modelele mari, poate rata generatoare AI noi nereprezentate in datele de antrenament</td>
+      </tr>
+    </table>
+
+    <h3>Rol in ensemble</h3>
+    <p>Modelul <strong>generalist de baza</strong> — ofera o opinie larga, nu specializata. Performeaza bine pe o gama larga de deepfake-uri comune.</p>
+  </div>
+
+  <!-- MODEL 2 -->
+  <div class="model-card m2">
+    <div class="model-header">
+      <div class="model-badge">M2</div>
+      <div>
+        <div class="model-title">garystafford/wav2vec2-deepfake-voice-detector</div>
+        <div class="model-subtitle">HuggingFace · Audio Classification · wav2vec2-XLSR-53</div>
+      </div>
+    </div>
+
+    <h3>Arhitectura</h3>
+    <p>
+      Bazat pe <code>wav2vec2-large-xlsr-53</code> — varianta <strong>multilingva</strong> a wav2vec2, pre-antrenata pe 53 de limbi si 128k ore de date audio. Modelul XLSR (Cross-Lingual Speech Representations) este semnificativ mai mare si mai puternic decat wav2vec2-base, cu <strong>~300 milioane de parametri</strong>.
+    </p>
+    <p>
+      Diferenta fata de M1: XLSR a invatat reprezentari vocale din 53 de limbi diferite, ceea ce ii confera o intelegere mai profunda a caracteristicilor universale ale vorbirii umane vs. vorbire sintetica.
+    </p>
+
+    <h3>Date de antrenament — specific si detaliat</h3>
+    <p>Acesta este modelul cu cele mai clare si transparente date de antrenament din ensemble. A fost antrenat specific pe audio generat de <strong>6 platforme TTS moderne</strong>:</p>
+    <table>
+      <tr><th>Platforma</th><th>Tip</th><th>Descriere</th></tr>
+      <tr><td><strong>ElevenLabs</strong></td><td>Clonare + TTS</td><td>Una din cele mai realiste platforme de sinteza vocala, folosita frecvent pentru deepfake-uri virale</td></tr>
+      <tr><td><strong>Amazon Polly</strong></td><td>TTS Cloud</td><td>Serviciul AWS de text-to-speech, larg utilizat in aplicatii comerciale</td></tr>
+      <tr><td><strong>Hexgrad Kokoro</strong></td><td>TTS open-source</td><td>Model TTS open-source modern, calitate ridicata</td></tr>
+      <tr><td><strong>Hume AI</strong></td><td>TTS emotional</td><td>Sintetizeaza voci cu expresivitate emotionala, mai greu de detectat</td></tr>
+      <tr><td><strong>Speechify</strong></td><td>TTS narativ</td><td>Platforma de naratie AI, populara pentru podcasturi si continut audio</td></tr>
+      <tr><td><strong>Luvvoice</strong></td><td>TTS multilingv</td><td>Sintetizor vocal multilingv online</td></tr>
+    </table>
+    <p>Dataset-ul contine <strong>1,866 fisiere audio</strong> (933 reale + 933 sintetice) — mai mic ca dimensiune dar extrem de targeted pe generatoarele moderne.</p>
+
+    <h3>Performante</h3>
+    <span class="metric good">Antrenat pe ElevenLabs direct</span>
+    <span class="metric info">300M parametri</span>
+    <span class="metric info">6 platforme TTS acoperite</span>
+
+    <h3>Rol in ensemble</h3>
+    <p>Modelul <strong>specialist in TTS modern</strong> — cel mai probabil sa detecteze voci generate cu platforme recente (ElevenLabs, Polly etc.). Complementar lui M1 care e generalist.</p>
+  </div>
+
+  <!-- MODEL 3 -->
+  <div class="model-card m3">
+    <div class="model-header">
+      <div class="model-badge">M3</div>
+      <div>
+        <div class="model-title">DavidCombei/wavLM-base-Deepfake_V2</div>
+        <div class="model-subtitle">HuggingFace · Audio Classification · WavLM-base (Microsoft)</div>
+      </div>
+    </div>
+
+    <h3>Arhitectura — WavLM: o evolutie fata de wav2vec2</h3>
+    <p>
+      Bazat pe <code>microsoft/wavLM-base</code> — un model creat de Microsoft Research care reprezinta o evolutie directa fata de wav2vec2. WavLM adauga doua inovatii cheie fata de wav2vec2:
+    </p>
+    <ol style="padding-left:20px; margin-bottom:12px;">
+      <li style="margin-bottom:8px;"><strong>Masked Speech Prediction</strong> (ca wav2vec2) — invata sa prezica token-uri audio mascate</li>
+      <li style="margin-bottom:8px;"><strong>Denoising Objective</strong> (nou) — invata sa reconstruiasca vorbire curata din vorbire cu zgomot, ceea ce ii confera robustete mai mare in conditii reale</li>
+    </ol>
+    <p>
+      Aceasta combinatie face WavLM mai bun decat wav2vec2 pentru sarcini care necesita intelegerea profunda a <em>continutului</em> vorbirii, nu doar a formei de unda. Cercetarile arata ca WavLM exceleaza pe sarcini de speaker verification, speech separation si deepfake detection.
+    </p>
+
+    <h3>Date de antrenament</h3>
+    <p>
+      WavLM-base a fost pre-antrenat pe <strong>960 ore LibriSpeech</strong> (engleza curata). Fine-tuning-ul pentru detectie deepfake a fost realizat de DavidCombei, bazandu-se pe metodologia descrisa in lucrarea <em>"WavLM model ensemble for audio deepfake detection"</em> (arxiv 2408.07414, 2024).
+    </p>
+
+    <h3>Performante</h3>
+    <span class="metric good">Acuratete: 99.62%</span>
+    <span class="metric good">Validation Loss: 0.0234</span>
+    <span class="metric good">15k downloads (cel mai popular model deepfake din lista)</span>
+    <span class="metric info">94.6M parametri</span>
+
+    <div class="alert alert-success" style="margin-top:14px;">
+      <span class="alert-icon">★</span>
+      <div>
+        <strong>Cel mai acurat model din ensemble</strong> cu 99.62% — si cel mai descărcat model de detectie deepfake audio de pe HuggingFace. Versiunea V2 (actuala) este a doua iteratie, imbunatatita fata de V1.
+      </div>
+    </div>
+
+    <h3>Rol in ensemble</h3>
+    <p>Modelul cu <strong>cea mai inalta acuratete globala</strong>. Datorita arhitecturii WavLM superioare, ofera predictii mai stabile si mai robuste decat modelele bazate pe wav2vec2 standard.</p>
+  </div>
+
+  <!-- MODEL 4 -->
+  <div class="model-card m4">
+    <div class="model-header">
+      <div class="model-badge">M4</div>
+      <div>
+        <div class="model-title">Gustking/wav2vec2-large-xlsr-deepfake-audio-classification</div>
+        <div class="model-subtitle">HuggingFace · Audio Classification · XLS-R 300M</div>
+      </div>
+    </div>
+
+    <h3>Arhitectura — XLS-R: cel mai puternic din familie</h3>
+    <p>
+      Bazat pe <code>facebook/wav2vec2-xls-r-300m</code> — modelul <strong>XLS-R cu 300 milioane de parametri</strong>, cea mai puternica varianta din familia wav2vec2. XLS-R (Cross-Lingual Speech Representations) este o extensie masiva a XLSR-53, pre-antrenat pe:
+    </p>
+    <ul style="padding-left:20px; margin-bottom:12px;">
+      <li><strong>436k ore</strong> de vorbire din surse publice (VoxPopuli, MLS, CommonVoice, VoxLingua107, BABEL)</li>
+      <li><strong>128 de limbi</strong></li>
+      <li>Dimensiune de 10x mai mare decat wav2vec2-base</li>
+    </ul>
+    <p>
+      Aceasta pre-antrenare masiva confera modelului o reprezentare extrem de bogata a vorbirii umane — capabil sa detecteze subtile anomalii in frecvente si prosodica care nu se gasesc in vorbirea naturala.
+    </p>
+
+    <h3>Date de antrenament</h3>
+    <p>
+      Fine-tuned pe <strong>ASVspoof2019</strong> — setul de date standard de referinta in cercetarea de detectie spoofing/deepfake audio. ASVspoof2019 contine:
+    </p>
+    <table>
+      <tr><th>Partitie</th><th>Continut</th></tr>
+      <tr><td>LA (Logical Access)</td><td>Voci sintetice TTS si VC (voice conversion) generate cu 19 sisteme diferite</td></tr>
+      <tr><td>PA (Physical Access)</td><td>Replay attacks — inregistrari de voci reale redate prin difuzor</td></tr>
+    </table>
+    <p>Fiind antrenat pe benchmark-ul standard al domeniului, M4 este cel mai usor de comparat academic cu alte sisteme.</p>
+
+    <h3>Performante (masurate pe ASVspoof2019)</h3>
+    <span class="metric good">F1 Score: 0.95</span>
+    <span class="metric good">Precision: 0.9999</span>
+    <span class="metric info">Recall: 0.9205</span>
+    <span class="metric info">EER: 4.01%</span>
+    <span class="metric info">Accuracy: 92.86%</span>
+    <span class="metric info">2.91k downloads</span>
+
+    <div class="alert alert-info" style="margin-top:14px;">
+      <span class="alert-icon">ℹ</span>
+      <div>
+        <strong>Cel mai relevant academic:</strong> Speech DF Arena 2025 confirma ca arhitectura XLSR (XLS-R) este cea mai performanta clasa de modele open-source pentru detectie deepfake audio. EER de 4.01% pe ASVspoof2019 este comparabil cu state-of-the-art din literatura.
+      </div>
+    </div>
+
+    <h3>Rol in ensemble</h3>
+    <p>Modelul <strong>academic de referinta</strong> — antrenat pe benchmark-ul standard al domeniului, cu cea mai mare capacitate de reprezentare (300M params). Complementar lui M2 (specialist TTS modern) si M3 (WavLM, acuratete maxima).</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="arhitecturi">
+  <h2><span class="num">3</span> Comparatie Arhitecturi — wav2vec2 vs WavLM vs XLS-R</h2>
+
+  <p>Cele 4 modele folosesc 3 arhitecturi distincte din aceeasi familie de modele audio self-supervised. Intelegerea diferentelor explica de ce ensemble-ul lor este mai robust decat oricare model individual.</p>
+
+  <table>
+    <tr>
+      <th>Caracteristica</th>
+      <th><span class="color-dot" style="background:var(--m1)"></span>wav2vec2-base</th>
+      <th><span class="color-dot" style="background:var(--m2)"></span>wav2vec2-XLSR-53</th>
+      <th><span class="color-dot" style="background:var(--m3)"></span>WavLM-base</th>
+      <th><span class="color-dot" style="background:var(--m4)"></span>XLS-R-300M</th>
+    </tr>
+    <tr>
+      <td><strong>Creat de</strong></td>
+      <td>Meta (Facebook AI)</td>
+      <td>Meta (Facebook AI)</td>
+      <td>Microsoft Research</td>
+      <td>Meta (Facebook AI)</td>
+    </tr>
+    <tr>
+      <td><strong>Parametri</strong></td>
+      <td>94.6M</td>
+      <td>~300M</td>
+      <td>94.6M</td>
+      <td>300M</td>
+    </tr>
+    <tr>
+      <td><strong>Date pre-antrenare</strong></td>
+      <td>960h LibriSpeech (EN)</td>
+      <td>56k ore, 53 limbi</td>
+      <td>960h LibriSpeech (EN)</td>
+      <td>436k ore, 128 limbi</td>
+    </tr>
+    <tr>
+      <td><strong>Obiectiv pre-antrenare</strong></td>
+      <td>Contrastive learning pe token-uri mascate</td>
+      <td>Contrastive learning multilingv</td>
+      <td>Masked prediction + <strong>Denoising</strong></td>
+      <td>Contrastive learning multilingv masiv</td>
+    </tr>
+    <tr>
+      <td><strong>Punct forte</strong></td>
+      <td>Rapid, generalist, compact</td>
+      <td>Multilingv, robust cross-lingual</td>
+      <td>Cel mai robust la zgomot, acuratete maxima</td>
+      <td>Capacitate maxima, SOTA academic</td>
+    </tr>
+    <tr>
+      <td><strong>Viteza inferenta</strong></td>
+      <td>Foarte rapida</td>
+      <td>Medie</td>
+      <td>Rapida</td>
+      <td>Mai lenta (300M params)</td>
+    </tr>
+    <tr>
+      <td><strong>VRAM estimat</strong></td>
+      <td>~380MB</td>
+      <td>~1.2GB</td>
+      <td>~380MB</td>
+      <td>~1.2GB</td>
+    </tr>
+  </table>
+
+  <h3>De ce WavLM e diferit de wav2vec2</h3>
+  <p>
+    Diferenta esentiala este obiectivul de pre-antrenare. wav2vec2 invata prin <em>contrastive learning</em> — distinge token-uri audio corecte de token-uri negative aleatorii. WavLM adauga un <strong>obiectiv de denoising</strong>: primeste audio cu zgomot si invata sa reconstruiasca varianta curata. Aceasta il face mai capabil sa detecteze artefacte subtile specifice vocii sintetice (smoothing excesiv, lipsa zgomotului de respiratie, uniformitate nenatural a spectrului).
+  </p>
+
+  <h3>De ce XLS-R e cel mai puternic</h3>
+  <p>
+    Cu 436k ore de date din 128 limbi, XLS-R a vazut o varietate uriasa de voci umane reale. Aceasta pre-antrenare masiva ii da un model intern de "cum suna vorbirea umana" extrem de detaliat — orice deviatie de la acest model (cum ar fi o voce AI) este mai usor de detectat. Dimensiunea de 300M parametri ii permite sa invete reprezentari mult mai fine granulare.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<section id="comparatie">
+  <h2><span class="num">4</span> Tabel Comparativ Complet</h2>
+
+  <table>
+    <tr>
+      <th>Criteriu</th>
+      <th><span class="color-dot" style="background:var(--m1)"></span>M1 MelodyMachine</th>
+      <th><span class="color-dot" style="background:var(--m2)"></span>M2 garystafford</th>
+      <th><span class="color-dot" style="background:var(--m3)"></span>M3 DavidCombei</th>
+      <th><span class="color-dot" style="background:var(--m4)"></span>M4 Gustking</th>
+    </tr>
+    <tr>
+      <td><strong>Model HuggingFace</strong></td>
+      <td><code style="font-size:0.78em">MelodyMachine/<br>Deepfake-audio-detection-V2</code></td>
+      <td><code style="font-size:0.78em">garystafford/<br>wav2vec2-deepfake-voice-detector</code></td>
+      <td><code style="font-size:0.78em">DavidCombei/<br>wavLM-base-Deepfake_V2</code></td>
+      <td><code style="font-size:0.78em">Gustking/<br>wav2vec2-large-xlsr-deepfake-audio-classification</code></td>
+    </tr>
+    <tr>
+      <td><strong>Arhitectura backbone</strong></td>
+      <td>wav2vec2-base</td>
+      <td>wav2vec2-XLSR-53</td>
+      <td>WavLM-base</td>
+      <td>XLS-R-300M</td>
+    </tr>
+    <tr>
+      <td><strong>Acuratete declarata</strong></td>
+      <td>~95%</td>
+      <td>~96%</td>
+      <td><strong>99.62%</strong></td>
+      <td>92.86% (ASVspoof)</td>
+    </tr>
+    <tr>
+      <td><strong>Antrenat pe</strong></td>
+      <td>General TTS/VC</td>
+      <td>ElevenLabs, Polly, Speechify, Hume, Kokoro, Luvvoice</td>
+      <td>ASVspoof + diverse</td>
+      <td>ASVspoof2019</td>
+    </tr>
+    <tr>
+      <td><strong>Downloads HuggingFace</strong></td>
+      <td>9,830</td>
+      <td>~1,000</td>
+      <td><strong>15,000</strong></td>
+      <td>2,910</td>
+    </tr>
+    <tr>
+      <td><strong>Limbi suportate</strong></td>
+      <td>Engleza (mainly)</td>
+      <td>Engleza (mainly)</td>
+      <td>Engleza</td>
+      <td>128 limbi</td>
+    </tr>
+    <tr>
+      <td><strong>Punct forte unic</strong></td>
+      <td>Generalist, popular, rapid</td>
+      <td>Specialist platforme TTS moderne</td>
+      <td>Acuratete maxima, arhitectura superioara</td>
+      <td>Cel mai mare, academic benchmark</td>
+    </tr>
+    <tr>
+      <td><strong>Risc fals negativ</strong></td>
+      <td>Mediu (generalist)</td>
+      <td>Mic pe TTS modern</td>
+      <td>Mic (acuratete 99.6%)</td>
+      <td>Mic pe ASVspoof, mediu pe TTS nou</td>
+    </tr>
+    <tr>
+      <td><strong>Tip licenta</strong></td>
+      <td>Gratuit, public</td>
+      <td>Gratuit, public</td>
+      <td>Gratuit, public</td>
+      <td>Gratuit, public</td>
+    </tr>
+    <tr>
+      <td><strong>Culoare in grafic</strong></td>
+      <td><span style="color:var(--m1); font-weight:bold;">■ Rosu (#e74c3c)</span></td>
+      <td><span style="color:var(--m2); font-weight:bold;">■ Mov (#8e44ad)</span></td>
+      <td><span style="color:var(--m3); font-weight:bold;">■ Albastru (#2980b9)</span></td>
+      <td><span style="color:var(--m4); font-weight:bold;">■ Verde (#27ae60)</span></td>
+    </tr>
+  </table>
+
+  <h3>Context: cele mai bune modele disponibile public gratuit</h3>
+  <p>
+    Aceasta selectie reprezinta cei mai buni <strong>4 detectori de deepfake audio disponibili gratuit</strong> pe HuggingFace cu interfata standard <code>AutoModelForAudioClassification</code>. Exista modele mai puternice (ex: <em>Whispeak</em> cu EER 3.05%, sau <em>mms-1b-anti-deepfake</em> cu 1B parametri), dar acestea fie sunt proprietare si platite, fie necesita cod de incarcare custom incompatibil cu pipeline-ul standardizat.
+  </p>
+  <p>
+    Conform <strong>Speech DF Arena Leaderboard 2025</strong> (cel mai complet benchmark academic pentru detectie deepfake audio), arhitectura XLSR+SLS este cea mai performanta open-source, cu Average EER de 13.84% pe 14 seturi de date diverse. Modelele noastre M4 (XLS-R) si M3 (WavLM) se aliniaza cu aceasta constatare.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<section id="ensemble">
+  <h2><span class="num">5</span> Metodologia Ensemble</h2>
+
+  <h3>Ce este un ensemble in machine learning</h3>
+  <p>
+    Un <strong>ensemble</strong> combina predictiile mai multor modele independente pentru a obtine o predictie finala mai robusta decat oricare model individual. Principiul fundamental: erorile modelelor individuale sunt <em>necorrelate</em> (fiecare model esueaza pe exemple diferite), deci media lor tinde spre zero.
+  </p>
+
+  <h3>Metoda folosita: medie simpla (Simple Averaging)</h3>
+  <p>
+    Pentru fiecare fereastra de 2 secunde, fiecare din cele 4 modele produce un scor intre 0 (real) si 1 (fake). Scorul ensemble este media aritmetica simpla a celor 4 scoruri:
+  </p>
+  <pre>
+score_ensemble = (score_M1 + score_M2 + score_M3 + score_M4) / 4</pre>
+  <p>Scorul global pe intregul audio se calculeaza ca o medie ponderata Hanning (da mai multa greutate segmentelor din centrul inregistrarii, mai putin celor de la margini):</p>
+  <pre>
+weights = np.hanning(n_windows) + 0.1   # +0.1 evita ponderi zero
+global_score = np.average(frame_scores, weights=weights)</pre>
+
+  <h3>De ce medie simpla si nu ponderata</h3>
+  <p>
+    O medie ponderata (ex: M3 cu greutate mai mare decat M1 deoarece are acuratete mai buna) ar fi teoretic mai precisa, dar necesita o evaluare pe un set de date de calibrare specific. Fara un astfel de set de date reprezentativ pentru toate tipurile de deepfake romanesti, media simpla este mai robusta — nu avantajeaza un model specific pe un tip de audio pentru care el este mai bun.
+  </p>
+
+  <h3>Interpretarea scorului ensemble</h3>
+  <table>
+    <tr><th>Scor ensemble</th><th>Verdict</th><th>Interpretare</th></tr>
+    <tr><td>> 75%</td><td style="color:#c0392b; font-weight:700;">PROBABIL AI-GENERAT</td><td>Cel putin 3 modele din 4 sunt convinse ca e fake. Nivel ridicat de confidenta.</td></tr>
+    <tr><td>50% – 75%</td><td style="color:#e67e22; font-weight:700;">POSIBIL AI-GENERAT</td><td>Majority vote fake, dar cu incertitudine. Modelele sunt divizate.</td></tr>
+    <tr><td>25% – 50%</td><td style="color:#3498db; font-weight:700;">POSIBIL REAL</td><td>Majority vote real, dar cu incertitudine.</td></tr>
+    <tr><td>< 25%</td><td style="color:#27ae60; font-weight:700;">PROBABIL REAL</td><td>Toate sau aproape toate modelele sunt convinse ca e real.</td></tr>
+  </table>
+
+  <h3>Analiza temporala — ferestre glisante</h3>
+  <p>In loc sa analizeze intregul audio o singura data, sistemul foloseste o <strong>fereastra glisanta</strong>:</p>
+  <ul style="padding-left:20px; margin-bottom:12px;">
+    <li><strong>Durata fereastra:</strong> 2 secunde (32,000 sample-uri la 16kHz)</li>
+    <li><strong>Hop (pas):</strong> 0.5 secunde — overlap de 75%</li>
+    <li><strong>Rezultat:</strong> scor per fereastra → grafic temporal</li>
+  </ul>
+  <p>
+    Aceasta abordare permite detectarea <strong>segmentelor specifice</strong> care sunt AI-generate, chiar si intr-un audio predominantly real. De exemplu, daca cineva a inlocuit doar un cuvant cu o voce sintetica, graficul temporal va arata un spike exact in acel moment.
+  </p>
+
+  <h3>Separarea vocala cu Demucs</h3>
+  <p>
+    Toate cele 4 modele au fost antrenate pe <strong>vorbire curata</strong> (fara muzica de fundal). Cand audio-ul contine muzica, modelele nu pot distinge artefactele vocii sintetice de artefactele muzicii — rezultand in false negative (scor 0% pe audio AI-generat cu background muzical).
+  </p>
+  <p>
+    Solutia: <strong>Demucs</strong> (Meta Research) — un model de separare surse audio antrenat pe 800 de melodii. Extrage componenta vocala din mix inainte ca aceasta sa fie trimisa la detectie. Pipeline-ul devine:
+  </p>
+  <pre>
+Audio brut (voce + muzica + zgomot)
+         ↓ Demucs htdemucs
+    Voce izolata (mono, 44.1kHz)
+         ↓ Librosa resample la 16kHz
+    Detectie cu 4 modele ensemble</pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="selectie">
+  <h2><span class="num">6</span> Justificarea Selectiei Modelelor</h2>
+
+  <h3>Criterii de selectie aplicate</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>1. Diversitate arhitecturala</h4>
+      <p>Am evitat sa avem 4 modele cu aceeasi arhitectura. Ensemble-ul acopera wav2vec2-base, XLSR-53, WavLM si XLS-R-300M — 3 arhitecturi distincte cu obiective de pre-antrenare diferite.</p>
+    </div>
+    <div class="card">
+      <h4>2. Diversitate date antrenament</h4>
+      <p>M1 — general; M2 — platforme TTS moderne (ElevenLabs, Polly); M3 — ASVspoof + diverse; M4 — ASVspoof2019 benchmark. Fiecare model "vede" altfel tipul de deepfake.</p>
+    </div>
+    <div class="card">
+      <h4>3. Compatibilitate standard</h4>
+      <p>Toate 4 folosesc AutoModelForAudioClassification + AutoFeatureExtractor din HuggingFace Transformers. Acelasi cod de incarcare si inferenta — zero overhead de implementare.</p>
+    </div>
+    <div class="card">
+      <h4>4. Acces gratuit</h4>
+      <p>Toate sunt publice pe HuggingFace fara restrictii de licenta pentru uz academic. Nu necesita API key, abonament sau aprobare speciala.</p>
+    </div>
+    <div class="card">
+      <h4>5. Validare comunitara</h4>
+      <p>Selectia prioritizeaza modelele cu multe download-uri (M3: 15k, M1: 9.8k, M4: 2.9k) — validare indirecta a utilitatii lor in productie.</p>
+    </div>
+    <div class="card">
+      <h4>6. Aliniere cu cercetarea</h4>
+      <p>Speech DF Arena 2025 confirma XLSR ca cea mai buna clasa de arhitecturi open-source (M4). WavLM este citat in literatura ca superior wav2vec2 pentru spoofing detection (M3).</p>
+    </div>
+  </div>
+
+  <h3>Modele considerate si respinse</h3>
+  <table>
+    <tr><th>Model</th><th>Motiv respingere</th></tr>
+    <tr>
+      <td>nii-yamagishilab/mms-1b-anti-deepfake</td>
+      <td>Necesita cod custom de incarcare (DeepfakeDetector class), incompatibil cu pipeline-ul standard. 1B parametri (~2GB VRAM extra) ar putea depasi T4 cu celelalte modele incarcate.</td>
+    </tr>
+    <tr>
+      <td>Om-Parab/distilhubert-finetuned-audio-deepfake-in-the-wild</td>
+      <td>Model card incomplet — lipsesc datele de antrenament, metricile de performanta, sample rate. Risc de comportament impredictibil in productie.</td>
+    </tr>
+    <tr>
+      <td>Whispeak Velma (proprietar)</td>
+      <td>EER 1.1% — cel mai bun model existent. Dar este proprietar, necesita abonament, nu disponibil public.</td>
+    </tr>
+    <tr>
+      <td>Hemgg/Deepfake-audio-detection</td>
+      <td>Aceeasi arhitectura (wav2vec2-base) ca M1 si date de antrenament similare — nu adauga diversitate reala ensemble-ului.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section id="limitari">
+  <h2><span class="num">7</span> Limitari cunoscute</h2>
+
+  <div class="card">
+    <h4>Generalizarea — provocarea fundamentala</h4>
+    <p>Speech DF Arena 2025 arata ca AUC a modelelor a scazut cu <strong>48%</strong> pe Deepfake-Eval-2024 fata de benchmark-urile anterioare. Generatoarele AI evolueaza mai rapid decat detectoarele. Ensemble-ul nostru reduce aceasta problema dar nu o elimina.</p>
+  </div>
+  <div class="card">
+    <h4>Dependenta de limba</h4>
+    <p>M1, M3 sunt antrenate predominant pe engleza. M2 pe engleza (platformele TTS testate). M4 pe 128 limbi dar fine-tuned tot pe engleza (ASVspoof). Performanta pe romana poate fi mai slaba decat pe engleza.</p>
+  </div>
+  <div class="card">
+    <h4>Compresia audio</h4>
+    <p>Audio descärcat de pe platforme (TikTok, YouTube, WhatsApp) trece prin compresie AAC/MP3 care poate elimina artefactele specifice vocii sintetice. Demucs + ensemble reduc impactul, dar nu il elimina complet.</p>
+  </div>
+  <div class="card">
+    <h4>Timp de inferenta</h4>
+    <p>Cu 4 modele, inferenta dureaza de ~2x mai mult fata de 2 modele. Pentru un audio de 57 secunde pe T4 GPU: estimat 30-60 secunde. Adaugand Demucs: +30-60 secunde suplimentar.</p>
+  </div>
+  <div class="card">
+    <h4>Pragul de decizie</h4>
+    <p>Pragul de 50% (sub = real, peste = fake) este arbitrar. Un sistem calibrat pe un set de date specific ar putea folosi un prag diferit (ex: 40% sau 60%) pentru a optimiza precizia vs. recall.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><strong>Neural Voice Identity Control and Deepfake Audio Analysis System</strong> — Proiect disertatie 2026</p>
+  <p style="margin-top:6px; color:#94a3b8;">
+    Modele: MelodyMachine V2 &bull; garystafford wav2vec2-XLSR &bull; DavidCombei WavLM V2 &bull; Gustking XLS-R-300M
+    &bull; Ensemble: medie simpla pe ferestre 2s
+  </p>
+  <p style="margin-top:4px; color:#94a3b8; font-size:0.82em;">
+    Referinte: Speech DF Arena (arxiv 2509.02859) &bull; WavLM ensemble (arxiv 2408.07414) &bull; ASVspoof 2019
+  </p>
+</footer>
+
+</body>
+</html>
