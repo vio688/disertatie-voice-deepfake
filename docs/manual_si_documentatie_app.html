@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual si Documentatie — Notebook 03: Main App</title>
+<style>
+  :root {
+    --primary: #6c63ff;
+    --primary-dark: #4b44cc;
+    --secondary: #e74c3c;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #6c63ff 0%, #a855f7 50%, #ec4899 100%);
+    color: white;
+    padding: 60px 40px 40px;
+    text-align: center;
+  }
+  header h1 { font-size: 2.2em; font-weight: 800; margin-bottom: 10px; }
+  header p { font-size: 1.05em; opacity: 0.9; }
+  header .badge {
+    display: inline-block; background: rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 4px 14px; font-size: 0.85em;
+    margin: 6px 4px; border: 1px solid rgba(255,255,255,0.3);
+  }
+  /* Nav */
+  nav {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 0 40px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  }
+  nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0; }
+  nav ul li a {
+    display: block; padding: 16px 18px; color: var(--muted);
+    text-decoration: none; font-size: 0.9em; font-weight: 500;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  nav ul li a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+  /* Main layout */
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+  /* Sections */
+  section { margin-bottom: 60px; }
+  h2 {
+    font-size: 1.6em; font-weight: 800; color: var(--primary);
+    margin-bottom: 20px; padding-bottom: 10px;
+    border-bottom: 3px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    background: var(--primary); color: white;
+    border-radius: 50%; width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.85em; flex-shrink: 0;
+  }
+  h3 {
+    font-size: 1.15em; font-weight: 700; color: var(--text);
+    margin: 28px 0 12px; display: flex; align-items: center; gap: 8px;
+  }
+  h3::before { content: ''; display: block; width: 4px; height: 18px; background: var(--primary); border-radius: 2px; }
+  p { margin-bottom: 12px; }
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card h4 { font-size: 1em; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
+  /* Code */
+  pre {
+    background: var(--code-bg); color: var(--code-text);
+    border-radius: 10px; padding: 20px; overflow-x: auto;
+    font-size: 0.85em; line-height: 1.6; margin: 16px 0;
+  }
+  code {
+    background: #f1f5f9; color: #7c3aed;
+    padding: 2px 6px; border-radius: 4px; font-size: 0.88em;
+    font-family: 'Consolas', 'Courier New', monospace;
+  }
+  pre code { background: none; color: var(--code-text); padding: 0; }
+  /* Tables */
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  th {
+    background: var(--primary); color: white;
+    padding: 12px 16px; font-size: 0.9em; text-align: left;
+  }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 0.92em; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+  /* Badges */
+  .badge-cell { background: #e0e7ff; border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 0.82em; font-weight: 600; color: #4338ca; font-family: monospace; }
+  /* Alert boxes */
+  .alert {
+    padding: 16px 20px; border-radius: 10px; margin: 16px 0;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .alert-icon { font-size: 1.3em; flex-shrink: 0; margin-top: 1px; }
+  .alert-info { background: #eff6ff; border-left: 4px solid var(--info); }
+  .alert-warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+  .alert-success { background: #f0fdf4; border-left: 4px solid var(--success); }
+  .alert-danger { background: #fef2f2; border-left: 4px solid var(--secondary); }
+  /* Steps */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex; gap: 16px; margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    counter-increment: step;
+    background: var(--primary); color: white;
+    border-radius: 50%; width: 30px; height: 30px; min-width: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9em;
+  }
+  .step-num::before { content: counter(step); }
+  .step-body { flex: 1; padding-top: 4px; }
+  /* Cell blocks */
+  .cell {
+    border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 16px; overflow: hidden;
+  }
+  .cell-header {
+    background: #f1f5f9; padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cell-id {
+    font-family: monospace; font-size: 0.82em;
+    color: var(--muted); background: white;
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .cell-title { font-weight: 700; font-size: 0.95em; }
+  .cell-body { padding: 16px; font-size: 0.93em; }
+  /* Slider visual */
+  .slider-demo {
+    display: flex; align-items: center; gap: 10px;
+    margin: 8px 0;
+  }
+  .slider-track {
+    flex: 1; height: 6px; background: linear-gradient(to right, #e2e8f0, var(--primary));
+    border-radius: 3px; position: relative;
+  }
+  .slider-label-row { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--muted); }
+  /* Architecture diagram */
+  .arch {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 8px; padding: 20px;
+  }
+  .arch-box {
+    background: white; border: 2px solid var(--primary);
+    border-radius: 10px; padding: 12px 20px; font-weight: 700;
+    font-size: 0.9em; text-align: center; color: var(--primary);
+  }
+  .arch-arrow { font-size: 1.4em; color: var(--muted); }
+  /* Footer */
+  footer {
+    text-align: center; padding: 30px;
+    color: var(--muted); font-size: 0.85em;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Neural Voice Identity Control</h1>
+  <p>Documentatie tehnica si Manual de utilizare — <strong>Notebook 03: Main App</strong></p>
+  <div style="margin-top:16px;">
+    <span class="badge">RVC v2</span>
+    <span class="badge">HuBERT</span>
+    <span class="badge">Gradio 4.x</span>
+    <span class="badge">Google Colab</span>
+    <span class="badge">Deepfake Detection</span>
+    <span class="badge">Disertatie 2026</span>
+  </div>
+</header>
+
+<nav>
+  <ul>
+    <li><a href="#prezentare">1. Prezentare</a></li>
+    <li><a href="#arhitectura">2. Arhitectura</a></li>
+    <li><a href="#celule">3. Celulele</a></li>
+    <li><a href="#manual-vc">4. Manual VC</a></li>
+    <li><a href="#manual-df">5. Manual Deepfake</a></li>
+    <li><a href="#parametri">6. Parametri avansati</a></li>
+    <li><a href="#troubleshoot">7. Probleme frecvente</a></li>
+  </ul>
+</nav>
+
+<main>
+
+<!-- ================================================================
+     SECTIUNEA 1: PREZENTARE
+     ================================================================ -->
+<section id="prezentare">
+  <h2><span class="num">1</span> Prezentare generala</h2>
+
+  <p>
+    <strong>Notebook-ul 03_main_app.ipynb</strong> este componenta centrala a proiectului de disertatie.
+    El combina doua sisteme de AI intr-o singura interfata Gradio rulata din Google Colab:
+  </p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>🎙 Voice Conversion</h4>
+      <p>Transforma vocea unui utilizator intr-o voce tinta (politician roman), pastrand continutul verbal dar schimband identitatea vocala. Foloseste modelul RVC v2 fine-tuned pe ~30 minute de audio per persoana.</p>
+    </div>
+    <div class="card">
+      <h4>🔍 Detectie Deepfake Audio</h4>
+      <p>Analizeaza un fisier audio si estimeaza probabilitatea ca acesta sa fi fost generat de inteligenta artificiala. Produce o analiza temporala pe ferestre de 2 secunde + spectrograma Mel cu overlay vizual.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">ℹ</span>
+    <div>
+      <strong>Scop academic exclusiv.</strong> Sistemul a fost construit pentru demonstrarea capacitatilor si limitelor tehnologiilor de sinteza vocala si detectie deepfake. Nu este destinat inselaciunii sau uzului comercial.
+    </div>
+  </div>
+
+  <h3>Voci disponibile</h3>
+  <table>
+    <tr><th>ID</th><th>Persoana</th><th>Caracteristici</th><th>Fisier model</th></tr>
+    <tr><td><span class="badge-cell">voice_1</span></td><td>Calin Georgescu</td><td>Ton grav, cadenta lenta, politician</td><td>voice_1.pth</td></tr>
+    <tr><td><span class="badge-cell">voice_2</span></td><td>Nicusor Dan</td><td>Ton academic, clar, primar Bucuresti</td><td>voice_2.pth</td></tr>
+    <tr><td><span class="badge-cell">voice_3</span></td><td>Diana Sosoaca</td><td>Ton ferm, energic, politician</td><td>voice_3.pth</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================
+     SECTIUNEA 2: ARHITECTURA
+     ================================================================ -->
+<section id="arhitectura">
+  <h2><span class="num">2</span> Arhitectura sistemului</h2>
+
+  <h3>Pipeline Voice Conversion</h3>
+
+  <div class="card" style="background:#f8f9ff;">
+    <div class="arch">
+      <div class="arch-box">Audio<br>input</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">HuBERT<br>(feature extractor)</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">RMVPE<br>(F0 extractor)</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">RVC v2<br>Generator</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">FAISS Index<br>(optional)</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">Audio<br>output</div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>HuBERT (facebook/hubert-base-ls960)</h4>
+      <p>Extrage reprezentari de continut vocal (ce se spune, independent de cine spune). Se foloseste layer 9 din modelul transformer. In loc de <code>fairseq</code> (incompatibil cu Python 3.12), se foloseste un <strong>mock</strong> bazat pe libraria <code>transformers</code>.</p>
+    </div>
+    <div class="card">
+      <h4>RMVPE (rmvpe.pt)</h4>
+      <p>Extrage pitch-ul (F0 — frecventa fundamentala) din audio cu precizie mare. Este metoda recomandata pentru RVC v2, superioara alternativelor harvest si crepe.</p>
+    </div>
+    <div class="card">
+      <h4>RVC v2 Generator</h4>
+      <p>Retea neurala (VITS-based) antrenata sa genereze vocea tinta. Primeste feature-urile HuBERT + F0 si produce audio la 40kHz. Fiecare voce are un fisier <code>.pth</code> cu greutatile modelului.</p>
+    </div>
+    <div class="card">
+      <h4>FAISS Index (.index)</h4>
+      <p>Index de cautare rapida care ajuta modelul sa reproduca mai fidel caracteristicile vocale din datele de antrenament. Controlat de parametrul <strong>Index Rate</strong>. Optional — daca fisierul lipseste, conversia merge fara el.</p>
+    </div>
+  </div>
+
+  <h3>Fairseq Mock — de ce e necesar</h3>
+  <p>
+    RVC importa <code>fairseq</code> pentru a incarca modelul HuBERT. Insa <code>fairseq</code> nu este compatibil cu Python 3.12 (versiunea din Colab 2025+). Solutia: se injecteaza un modul Python fals in <code>sys.modules['fairseq']</code> inainte ca RVC sa fie importat. Acest modul fals are aceeasi interfata API (<code>load_model_ensemble_and_task</code>) dar returneaza un obiect <code>FakeHubertModel</code> care in interior foloseste <code>transformers.HubertModel</code>.
+  </p>
+
+  <h3>Pipeline Detectie Deepfake</h3>
+  <div class="card" style="background:#f8f9ff;">
+    <div class="arch">
+      <div class="arch-box">Audio<br>input</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">Librosa<br>16kHz mono</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">Ferestre 2s<br>hop 0.5s</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">Wav2Vec2<br>Classifier</div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-box">Scor global<br>+ Grafice</div>
+    </div>
+  </div>
+
+  <p>Modelul folosit este <code>MelodyMachine/Deepfake-audio-detection-V2</code> de pe HuggingFace — un clasificator binar antrenat pe wav2vec2, care distinge intre audio real si audio generat de AI. Analiza se face pe ferestre de 2 secunde, cu overlap, pentru a detecta segmente specifice care pot fi AI-generate.</p>
+
+  <h3>Variabile de mediu RVC</h3>
+  <table>
+    <tr><th>Variabila</th><th>Valoare</th><th>Rol</th></tr>
+    <tr><td><code>weight_root</code></td><td><code>/content/drive/MyDrive/disertatie/models</code></td><td>Director unde RVC cauta fisierele .pth</td></tr>
+    <tr><td><code>index_root</code></td><td><code>/content/drive/MyDrive/disertatie/models</code></td><td>Director unde RVC cauta fisierele .index</td></tr>
+    <tr><td><code>rmvpe_root</code></td><td><code>/content/RVC/assets/rmvpe</code></td><td>Director cu modelul RMVPE</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================
+     SECTIUNEA 3: CELULELE
+     ================================================================ -->
+<section id="celule">
+  <h2><span class="num">3</span> Descrierea celulelor</h2>
+
+  <p>Notebook-ul contine urmatoarele celule, in ordinea executiei:</p>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">ab000002</span>
+      <span class="cell-title">Mount Google Drive + verificare GPU</span>
+    </div>
+    <div class="cell-body">
+      Monteaza Google Drive la <code>/content/drive</code>. Verifica si afiseaza GPU-ul disponibil (T4/A100/CPU). <strong>Trebuie sa ruleze primul</strong> — toate modelele sunt pe Drive.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">ac000003</span>
+      <span class="cell-title">Instalare dependinte</span>
+    </div>
+    <div class="cell-body">
+      Instaleaza toate pachetele necesare: <code>gradio</code>, <code>librosa</code>, <code>soundfile</code>, <code>transformers</code>, <code>faiss-cpu</code>, <code>pyworld</code>, <code>praat-parselmouth</code>, <code>torchcrepe</code> si altele. Instaleaza si <code>ffmpeg</code> prin apt-get.
+      Dureaza 2-4 minute la prima rulare.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">ad000004</span>
+      <span class="cell-title">Setup RVC — clone repo + download modele</span>
+    </div>
+    <div class="cell-body">
+      Cloneaza repo-ul RVC la <code>/content/RVC</code> (daca nu exista deja). Descarca <code>hubert_base.pt</code> si <code>rmvpe.pt</code> din HuggingFace. Adauga RVC in <code>sys.path</code>.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">7e4f1ff2</span>
+      <span class="cell-title">Fairseq Mock (HuBERT via transformers)</span>
+    </div>
+    <div class="cell-body">
+      Instaleaza modulul fals <code>fairseq</code> in memorie. Descarca <code>facebook/hubert-base-ls960</code> din HuggingFace. Clasa <code>FakeHubertModel</code> expune metoda <code>extract_features(source, output_layer=9)</code> compatibila cu API-ul fairseq. <strong>Trebuie sa ruleze inainte de orice import RVC.</strong>
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">af000006</span>
+      <span class="cell-title">VOICE_CONFIG + MODELS_DIR</span>
+    </div>
+    <div class="cell-body">
+      Defineste <code>MODELS_DIR</code>, <code>VOICE_CONFIG</code> (dictionar cu informatii despre fiecare voce) si <code>DEEPFAKE_MODEL_ID</code>. Verifica si afiseaza ce modele exista pe Drive. <strong>Modifica aici calea <code>DRIVE_BASE</code> daca folderul tau Drive are alt nume.</strong>
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">e3b3fb07</span>
+      <span class="cell-title">Export modele din format checkpoint → format inferenta</span>
+    </div>
+    <div class="cell-body">
+      Converteste fisierele <code>.pth</code> din formatul de training (<code>{'model', 'optimizer', 'iteration'}</code>) in formatul de inferenta asteptat de RVC (<code>{'weight', 'config', 'f0', 'version', 'sr', 'info'}</code>). Daca modelul e deja in format corect, nu face nimic. <strong>Ruleaza o singura data</strong> — modifica fisierele .pth pe Drive.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">b0000007</span>
+      <span class="cell-title">Incarcare model detectie deepfake</span>
+    </div>
+    <div class="cell-body">
+      Descarca si incarca <code>MelodyMachine/Deepfake-audio-detection-V2</code> din HuggingFace. Detecteaza automat ce index din output corespunde clasei "fake". Dureaza 1-2 minute la prima rulare.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">c0000008</span>
+      <span class="cell-title">Functia detect_deepfake()</span>
+    </div>
+    <div class="cell-body">
+      Defineste functia de detectie. Incarca audio la 16kHz, segmenteaza in ferestre de 2s cu hop de 0.5s, ruleaza clasificatorul pe fiecare fereastra, calculeaza scorul global ponderat Hanning. Returneaza: <code>(scor_global, fig_timeline, fig_spectrogram)</code>.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">d0000009</span>
+      <span class="cell-title">Functia voice_convert()</span>
+    </div>
+    <div class="cell-body">
+      Defineste functia centrala de conversie vocala. Seteaza variabilele de mediu, incarca modelul RVC la prima utilizare (sau la schimbarea vocii), apeleaza <code>vc_single()</code> si salveaza rezultatul ca fisier WAV temporar. Modelul e pastrat in cache (<code>_rvc_instance</code>) pentru a evita reincarcarile repetate.
+      <br><br>
+      <strong>Detalii tehnice importante:</strong>
+      <ul style="margin-top:8px; padding-left:20px;">
+        <li><code>cfg_rvc.is_half = False</code> — dezactiveaza half-precision pentru a evita erori de tip float/half mismatch</li>
+        <li><code>sys.argv = ['']</code> inainte de <code>Config()</code> — evita crash-ul argparse in Colab</li>
+        <li><code>vc_single()</code> returneaza <code>(status_str, (sample_rate, audio_int16))</code> — unpackingul corect e <code>status_msg, audio_data = result</code></li>
+        <li>Conversia int16→float32: <code>out.astype(np.float32) / 32768.0</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">f0000011</span>
+      <span class="cell-title">Interfata Gradio (UI)</span>
+    </div>
+    <div class="cell-body">
+      Defineste layout-ul aplicatiei cu 3 tab-uri: <em>Conversie Vocala</em>, <em>Detectie Deepfake</em>, <em>Despre</em>. Conecteaza butoanele la functiile callback (<code>vc_callback_radio</code>, <code>df_callback_new</code>). Nu lanseaza serverul — doar defineste obiectul <code>app</code>.
+    </div>
+  </div>
+
+  <div class="cell">
+    <div class="cell-header">
+      <span class="cell-id">a1000012</span>
+      <span class="cell-title">Lansare aplicatie</span>
+    </div>
+    <div class="cell-body">
+      <code>app.queue().launch(share=True, debug=False, quiet=False)</code>. <code>.queue()</code> este obligatoriu pentru a evita deconectarile pe inferenta lunga. <code>share=True</code> genereaza un URL public gradio.live valabil 72 ore.
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTIUNEA 4: MANUAL VOICE CONVERSION
+     ================================================================ -->
+<section id="manual-vc">
+  <h2><span class="num">4</span> Manual — Conversie Vocala</h2>
+
+  <h3>Cum pornesti aplicatia</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Verifica runtime-ul:</strong> Runtime → Change runtime type → T4 GPU. Fara GPU, inferenta este extrem de lenta (30-60 secunde/conversie in loc de 1-2 secunde).</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Ruleaza toate celulele:</strong> Runtime → Run all. Dureaza 5-10 minute la prima rulare (descarcari + instalari). La runarile ulterioare (in aceeasi sesiune) dureaza 1-2 minute.</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Acceseaza URL-ul Gradio:</strong> La sfarsit apare un link de tipul <code>https://xxxxxx.gradio.live</code>. Deschide-l in browser. Este valid 72 de ore.</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Daca vrei un URL nou</strong> fara sa rulezi tot din nou: ruleaza din nou doar ultima celula (<code>a1000012</code>).</div>
+    </div>
+  </div>
+
+  <h3>Folosirea tab-ului Conversie Vocala</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body">
+        <strong>Pasul 1 — Incarca audio:</strong> Fie uploadezi un fisier WAV/MP3, fie inregistrezi direct cu microfonul. Audio optim: 5-30 secunde, voce clara, fara zgomot de fundal.
+        <div class="alert alert-warning" style="margin-top:10px;">
+          <span class="alert-icon">⚠</span>
+          <div>Inregistrarea cu microfonul poate fi instabila in unele browsere — daca inregistrarea dispare, foloseste upload de fisier.</div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Pasul 2 — Alege vocea tinta:</strong> Selecteaza una dintre cele 3 voci din lista radio.</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>(Optional) Seteaza pitch shift:</strong> Deschide "Setari avansate" si ajusteaza sliderul "Pitch shift". Vezi tabelul de mai jos.</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Pasul 3 — Converteste:</strong> Apasa "Converteste vocea". Asteapta 2-5 secunde. Rezultatul apare in dreapta si poate fi descarcat.</div>
+    </div>
+  </div>
+
+  <h3>Tabel Pitch Shift (semitonuri)</h3>
+  <p>Aceasta este cea mai importanta setare pentru calitatea conversiei. Diferenta de gen dintre vocea sursa si vocea tinta necesita ajustare manuala:</p>
+  <table>
+    <tr>
+      <th>Voce sursa</th>
+      <th>Voce tinta</th>
+      <th>Pitch shift recomandat</th>
+      <th>Note</th>
+    </tr>
+    <tr>
+      <td>Voce de femeie</td>
+      <td>Georgescu (barbat grav)</td>
+      <td style="color:#e74c3c; font-weight:700;">-10 sau -12</td>
+      <td>Incearca -10, ajusteaza daca suna fortat</td>
+    </tr>
+    <tr>
+      <td>Voce de femeie</td>
+      <td>Nicusor Dan (barbat tenor)</td>
+      <td style="color:#e67e22; font-weight:700;">-6 sau -8</td>
+      <td>Nicusor are voce mai inalta decat Georgescu</td>
+    </tr>
+    <tr>
+      <td>Voce de femeie</td>
+      <td>Sosoaca (femeie)</td>
+      <td style="color:#27ae60; font-weight:700;">0 sau +2</td>
+      <td>Acelasi gen — de obicei nu e nevoie de ajustare</td>
+    </tr>
+    <tr>
+      <td>Voce de barbat</td>
+      <td>Georgescu (barbat grav)</td>
+      <td style="color:#27ae60; font-weight:700;">0</td>
+      <td>Acelasi gen — merge bine direct</td>
+    </tr>
+    <tr>
+      <td>Voce de barbat</td>
+      <td>Nicusor Dan (barbat)</td>
+      <td style="color:#27ae60; font-weight:700;">0 sau +2</td>
+      <td>Nicusor e usor mai inalt — ajusteaza dupa ureche</td>
+    </tr>
+    <tr>
+      <td>Voce de barbat</td>
+      <td>Sosoaca (femeie)</td>
+      <td style="color:#e74c3c; font-weight:700;">+10 sau +12</td>
+      <td>Diferenta mare de gen — necesita ridicare de pitch</td>
+    </tr>
+  </table>
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div>Valorile din tabel sunt puncte de plecare. Ajusteaza cu cate 2 semitone dupa ureche pana suna natural. Vocea ta specifica poate necesita valori diferite.</div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTIUNEA 5: MANUAL DEEPFAKE
+     ================================================================ -->
+<section id="manual-df">
+  <h2><span class="num">5</span> Manual — Detectie Deepfake</h2>
+
+  <h3>Cum se foloseste</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Deschide tab-ul "Detectie Deepfake"</strong> din interfata Gradio.</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Incarca un fisier audio</strong> (WAV, MP3, FLAC etc.) — fie un clip real, fie unul generat de AI (de exemplu, rezultatul de la Voice Conversion).</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Apasa "Analizeaza".</strong> Modelul proceseaza fereastra cu fereastra (2s cu hop 0.5s). Durata: 5-15 secunde in functie de lungimea audio.</div>
+    </div>
+    <div class="step">
+      <div class="step-num"></div>
+      <div class="step-body"><strong>Interpreteaza rezultatele:</strong> Apar 3 elemente — verdictul text, graficul temporal si spectrograma Mel.</div>
+    </div>
+  </div>
+
+  <h3>Interpretarea verdictului</h3>
+  <table>
+    <tr><th>Verdict</th><th>Scor</th><th>Semnificatie</th></tr>
+    <tr><td style="color:#c0392b; font-weight:700;">PROBABIL AI-GENERAT</td><td>&gt; 75%</td><td>Modelul e foarte confident ca audio-ul e sintetic</td></tr>
+    <tr><td style="color:#e67e22; font-weight:700;">POSIBIL AI-GENERAT</td><td>50% – 75%</td><td>Semne de sinteza, dar nu concludent</td></tr>
+    <tr><td style="color:#3498db; font-weight:700;">POSIBIL REAL</td><td>25% – 50%</td><td>Mai probabil real, dar cu incertitudine</td></tr>
+    <tr><td style="color:#27ae60; font-weight:700;">PROBABIL REAL</td><td>&lt; 25%</td><td>Modelul e confident ca audio-ul este real</td></tr>
+  </table>
+
+  <h3>Interpretarea graficelor</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>Grafic temporal (Timeline)</h4>
+      <p>Axa X = timp (secunde), Axa Y = probabilitate AI (0–100%). Linia rosie arata scorul per fereastra. Linia punctata = media globala. Un spike la un moment specific poate indica o portiune editata/inlocuita.</p>
+    </div>
+    <div class="card">
+      <h4>Spectrograma Mel + Overlay</h4>
+      <p>Spectrograma standard Mel cu overlay colorat: <span style="color:#e74c3c; font-weight:bold;">rosu</span> = segment suspect AI, <span style="color:#27ae60; font-weight:bold;">verde</span> = segment probabil real. Ajuta la identificarea vizuala a zonelor problematice.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-warning">
+    <span class="alert-icon">⚠</span>
+    <div>Niciun detector de deepfake nu este 100% precis. Audio-ul convertit cu Voice Conversion poate sau nu sa fie detectat ca fake, in functie de calitatea modelului si caracteristicile sursei. Rezultatele trebuie interpretate ca indicative, nu definitive.</div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTIUNEA 6: PARAMETRI AVANSATI
+     ================================================================ -->
+<section id="parametri">
+  <h2><span class="num">6</span> Parametri avansati — Voice Conversion</h2>
+
+  <p>Accesibili din sectiunea "Setari avansate" de sub selectorul de voce.</p>
+
+  <!-- Pitch Shift -->
+  <div class="card">
+    <h4>🎵 Pitch Shift (semitonuri) — Range: -12 la +12, Default: 0</h4>
+    <div class="slider-label-row"><span>-12 (coboara)</span><span>0 (neutru)</span><span>+12 (urca)</span></div>
+    <div style="height:8px; background:linear-gradient(to right, #3b82f6, #e2e8f0 50%, #e74c3c); border-radius:4px; margin:6px 0 12px;"></div>
+    <p><strong>Ce face:</strong> Transforma pitch-ul (inaltimea) vocii sursa inainte de conversie. Un semiton = diferenta minima perceptibila de pitch in muzica (o octava = 12 semitone).</p>
+    <p><strong>Cand se foloseste:</strong> Cand vocea sursa si vocea tinta sunt de gen diferit. O voce de femeie (~200 Hz) trebuie coborata cu 8-12 semitone pentru a imita un barbat (~100-130 Hz). Invers pentru barbat → femeie.</p>
+    <p><strong>Regula practica:</strong> Porneste de la valoarea din tabelul de la sectiunea 4, asculta, ajusteaza cu ±2 pana suna natural.</p>
+  </div>
+
+  <!-- Index Rate -->
+  <div class="card">
+    <h4>📁 Index Rate (Rata indicelui) — Range: 0.0 la 1.0, Default: 0.75</h4>
+    <div class="slider-label-row"><span>0.0 (fara index)</span><span>0.5 (echilibru)</span><span>1.0 (index maxim)</span></div>
+    <div style="height:8px; background:linear-gradient(to right, #e2e8f0, var(--primary)); border-radius:4px; margin:6px 0 12px;"></div>
+    <p><strong>Ce este indexul:</strong> In timpul antrenamentului RVC, alaturi de modelul .pth se creeaza si un fisier .index — o baza de date (FAISS) cu caracteristicile vocale din datele de antrenament. La inferenta, modelul poate "consulta" aceasta baza pentru a reproduce mai fidel particularitatile vocii tinta.</p>
+    <p><strong>Efectul valorii:</strong></p>
+    <table>
+      <tr><th>Valoare</th><th>Efect</th><th>Cand se foloseste</th></tr>
+      <tr><td>0.0</td><td>Indexul este ignorat complet — doar modelul .pth</td><td>Daca indexul lipseste sau produce artefacte</td></tr>
+      <tr><td>0.5 – 0.7</td><td>Echilibru — timbrulvocal e mai natural</td><td>Voce sursa foarte diferita de target</td></tr>
+      <tr><td>0.75 – 0.85</td><td>Caracteristici vocale puternice ale tintei</td><td>Recomandat implicit — cele mai bune rezultate in general</td></tr>
+      <tr><td>0.9 – 1.0</td><td>Index dominant — poate produce artefacte metalice/robotice</td><td>Evita daca audio-ul suna artificial</td></tr>
+    </table>
+    <div class="alert alert-info" style="margin-top:12px;">
+      <span class="alert-icon">💡</span>
+      <div>Daca nu exista fisier .index in folderul de modele, parametrul este ignorat automat — conversia se face fara index si rezultatele sunt totusi bune.</div>
+    </div>
+  </div>
+
+  <!-- Consonant Protection -->
+  <div class="card">
+    <h4>🛡 Consonant Protection (Protectia consonantelor) — Range: 0.0 la 0.5, Default: 0.33</h4>
+    <div class="slider-label-row"><span>0.0 (fara protectie)</span><span>0.25 (medie)</span><span>0.5 (maxima)</span></div>
+    <div style="height:8px; background:linear-gradient(to right, #e74c3c, #f59e0b, var(--success)); border-radius:4px; margin:6px 0 12px;"></div>
+    <p><strong>Ce sunt consonantele nesonante:</strong> Sunete ca <em>p, t, k, s, f, ș, h</em> — produse fara vibratia corzilor vocale. Ele nu au pitch propriu-zis, deci conversia de pitch le poate distorsiona.</p>
+    <p><strong>Ce face parametrul:</strong> Protejeaza segmentele fara pitch (consonante nesonante) de modificarea pitch-ului. Un segment protejat isi pastreaza caracteristicile originale in loc sa fie transformat.</p>
+    <p><strong>Efectul valorii:</strong></p>
+    <table>
+      <tr><th>Valoare</th><th>Efect</th><th>Cand se foloseste</th></tr>
+      <tr><td>0.0</td><td>Zero protectie — toate segmentele sunt convertite</td><td>Cand vrei conversie maxima, accepti distorsiuni pe consoane</td></tr>
+      <tr><td>0.33</td><td>Echilibru — consoanele suna natural, identitate vocala buna</td><td>Valoarea recomandata implicit</td></tr>
+      <tr><td>0.5</td><td>Protectie maxima — consoanele suna clar, dar conversia e mai putin evidenta</td><td>Cand audio-ul sursa are multe consoane si suna distorsionat</td></tr>
+    </table>
+    <div class="alert alert-success" style="margin-top:12px;">
+      <span class="alert-icon">✓</span>
+      <div><strong>Regula simpla:</strong> Lasa la 0.33 implicit. Creste la 0.4-0.5 daca consoanele suna "metalice" sau distorsionate. Scade la 0.1-0.2 daca vrei ca vocea tinta sa fie mai dominanta.</div>
+    </div>
+  </div>
+
+  <!-- Rezumat parametri -->
+  <h3>Rezumat rapid — ce sa ajustezi</h3>
+  <table>
+    <tr><th>Simptom</th><th>Parametru de ajustat</th><th>Directie</th></tr>
+    <tr><td>Vocea suna prea inalta / pitigaiata</td><td>Pitch shift</td><td>Scade (ex: -4)</td></tr>
+    <tr><td>Vocea suna prea joasa / groasa</td><td>Pitch shift</td><td>Creste (ex: +4)</td></tr>
+    <tr><td>Identitatea vocii tinta nu e clara</td><td>Index Rate</td><td>Creste (ex: 0.85)</td></tr>
+    <tr><td>Sunet metalic / robotic</td><td>Index Rate</td><td>Scade (ex: 0.5)</td></tr>
+    <tr><td>Consonantele suna distorsionat</td><td>Consonant Protection</td><td>Creste (ex: 0.45)</td></tr>
+    <tr><td>Vocea tinta nu se aude suficient</td><td>Consonant Protection</td><td>Scade (ex: 0.15)</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================
+     SECTIUNEA 7: TROUBLESHOOTING
+     ================================================================ -->
+<section id="troubleshoot">
+  <h2><span class="num">7</span> Probleme frecvente si solutii</h2>
+
+  <div class="card">
+    <h4>❌ "Modelul lipseste. Ruleaza 02_rvc_finetune.ipynb."</h4>
+    <p>Fisierele voice_1.pth / voice_2.pth / voice_3.pth nu exista in <code>/content/drive/MyDrive/disertatie/models/</code>. Trebuie antrenate cu notebook-ul 02_rvc_finetune.ipynb (necesita GPU, 30-60 min per voce).</p>
+  </div>
+
+  <div class="card">
+    <h4>❌ "Conexiunea la server a fost pierduta"</h4>
+    <p>Gradio a dat timeout pe o inferenta lunga. Solutia este deja aplicata in notebook: <code>app.queue().launch(...)</code>. Daca se intampla totusi, ruleaza din nou ultima celula pentru un URL nou.</p>
+  </div>
+
+  <div class="card">
+    <h4>❌ Inregistrarea audio dispare sau nu se incarca</h4>
+    <p>Problema cunoscuta cu componenta microfon Gradio in unele browsere. Solutii: (1) foloseste upload de fisier in loc de microfon; (2) incearca un alt browser (Chrome recomandat); (3) verifica permisiunile de microfon in browser.</p>
+  </div>
+
+  <div class="card">
+    <h4>❌ Eroare la rularea Runtime → Run All</h4>
+    <p>Cel mai probabil Google Drive nu e montat inca. Asigura-te ca celula <code>ab000002</code> a rulat si ti-a cerut autorizarea Google Drive. Re-ruleaza de la inceput dupa autorizare.</p>
+  </div>
+
+  <div class="card">
+    <h4>❌ Conversia dureaza 30+ secunde sau crapa</h4>
+    <p>Rulezi pe CPU in loc de GPU. Verifica: Runtime → Change runtime type → T4 GPU. Dupa schimbare trebuie sa rulezi din nou toate celulele (Runtime → Run all).</p>
+  </div>
+
+  <div class="card">
+    <h4>❌ Vocile disponibile sunt 0 la celula af000006</h4>
+    <p>Calea catre modelele de pe Drive este gresita. Verifica ca <code>DRIVE_BASE = '/content/drive/MyDrive/disertatie'</code> corespunde cu structura ta de foldere. Daca folderul tau se numeste diferit, modifica aceasta variabila in celula <code>af000006</code>.</p>
+  </div>
+
+  <div class="card">
+    <h4>❌ URL-ul Gradio a expirat</h4>
+    <p>URL-urile gradio.live sunt valabile 72 de ore. Daca a expirat, ruleaza din nou ultima celula (<code>a1000012</code>) — nu trebuie sa rulezi tot notebook-ul, modelele sunt deja incarcate in memorie.</p>
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  <p>Neural Voice Identity Control and Deepfake Audio Analysis System &mdash; Proiect disertatie 2026</p>
+  <p style="margin-top:6px; color:#94a3b8;">Stack: Python 3.10 &bull; RVC v2 &bull; HuBERT &bull; RMVPE &bull; Gradio 4.x &bull; transformers &bull; Google Colab T4 GPU</p>
+</footer>
+
+</body>
+</html>
